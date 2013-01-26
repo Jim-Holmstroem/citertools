@@ -36,5 +36,28 @@ int main(int argc, const char **argv) {
     std::vector< std::pair<int, int> >::iterator m (cit::argmax(ints.begin(), ints.end(), IntPairFunctor()));
 
     std::cout << std::endl << "argmax: " << m->first << ", " << m->second << std::endl;
+    
+    DEB_PRINTF("debug message");
+    WARN_PRINTF("warning message");
+    ERR_PRINTF("error message");
+    
+    /* Simpler call to known std::list, std::vector types that define begin(), end() */
+    
+    std::vector< std::pair<int, int> >::const_iterator m2 = cit::argmax(ints, IntPairFunctor());
+    std::cout << std::endl << "argmax 2: " << m2->first << ", " << m2->second << std::endl;
+    
+    
+#ifdef _CITERTOOLS_CPP11_
+
+    auto m3 = cit::argmax(ints);
+    
+    std::cout << "argmax 3: " << m3->first << ", " << m3->second << std::endl;
+    
+    std::cout << "argmax 4: " << cit::argmax({1, 2, 3}) << std::endl;
+    
+    // backward, i.e. argmin
+    std::cout << "argmax 5: " << cit::argmax({1, 2, 3}, std::negate<int>()) << std::endl;
+
+#endif /* N _CITERTOOLS_CPP11_ */
 }
 
