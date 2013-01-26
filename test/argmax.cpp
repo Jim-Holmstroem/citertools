@@ -33,8 +33,8 @@ int main(int argc, const char **argv) {
 
     std::generate_n(std::back_insert_iterator< std::vector< std::pair<int, int> > >(ints), 1000, rand_pair);
 
-    std::vector< std::pair<int, int> >::iterator m (argmax(ints.begin(), ints.end(), IntPairFunctor()));
+    std::vector< std::pair<int, int> >::iterator m (cit::argmax(ints.begin(), ints.end(), IntPairFunctor()));
 
-    std::cout << std::endl << "argmax: " << *m << std::endl;
+    std::cout << std::endl << "argmax: " << m->first << ", " << m->second << std::endl;
 }
 
