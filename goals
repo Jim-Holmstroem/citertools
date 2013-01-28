@@ -1,0 +1,19 @@
+Generator g1 = {1,2};
+Generator g2 = "fo";
+
+for(tuple<int,char> t; g1*g2) //g1*g2 = citer.product(g1,g2)
+{
+    ...
+}
+for(tuple<int,int,int> t;g1*g1*g1)
+{
+    ...
+}
+
+for(tuple<int,char> t; citer.zip(g1,g2))
+{
+    ...
+}
+
+reduce(min,map(max,g1*g2));
+
