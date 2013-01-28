@@ -23,9 +23,9 @@ namespace cit {
             inline T && operator() (U && value) const {
                 return std::forward<T>(value);
             }
-    };
-
 #endif /* N _CITERTOOLS_CPP11_ */
+
+    };
 
 }
 
