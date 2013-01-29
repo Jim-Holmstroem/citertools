@@ -71,7 +71,18 @@ int main(int argc, const char **argv) {
      */
     
     std::cerr << "only dividables by 6 results: ";
-    cit::reduce(is_dividable<6>(), output.begin(), output.end(), std::ostream_iterator<int>(std::cerr, " "));
+    cit::filter(is_dividable<6>(), output.begin(), output.end(), std::ostream_iterator<int>(std::cerr, " "));
     std::cerr << std::endl;
+    
+    std::cerr << "Sum over output: " << cit::reduce(std::plus<int>(), output.begin(), output.end()) << std::endl;
+    
+    std::cerr << "Multiplies over initializer_list: " << cit::reduce(std::multiplies<int>(), { 1, 2, 3 }) << std::endl;
+    
+    /*
+     * other map example for containers
+     */
+    
+    /*std::vector<int> output2;
+    cit::mapc(zipper(), std::back_inserter(output2), vector_ints, list_ints);*/
 }
 

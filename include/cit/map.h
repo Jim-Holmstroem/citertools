@@ -3,10 +3,13 @@
 
 #include <cit/definition.h>
 #include <numeric>
+#include <utility>
 
 #ifndef _CITERTOOLS_CPP11_
 #error "Nothing in <cit/map.h> can be used when not using C++11!"
 #else
+
+#include <initializer_list>
 
 namespace cit {
     /*
@@ -32,6 +35,15 @@ namespace cit {
         
         template<typename... Args> inline void pass(Args&...) {
             
+        }
+        
+        /*
+         * Obtain the begin iterator from a container
+         */
+        
+        template<typename ContainerT>
+        typename ContainerT::const_iterator container(const ContainerT & container) {
+            return container.begin();
         }
     }
 
@@ -69,12 +81,21 @@ namespace cit {
     }
     
     /*
+     * Alias for containers, might be more convenient in some cases
+     */
+    
+    /*template<typename FunctorT, typename OutputIteratorT, typename ContainerT, typename... Args>
+    inline void mapc(const FunctorT & functor, OutputIteratorT output, const ContainerT & container, const Args &... its) {
+        return map(functor, output, container.begin(), container.end(), _map::container(its)... );
+    }*/
+    
+    /*
      * filter: If the functor returns something that decuces to true,
      * the element is added to the output
      */
     
     template<typename FunctorT, typename OutputIteratorT, typename IteratorT>
-    void reduce(const FunctorT & functor, IteratorT it, const IteratorT & end, OutputIteratorT output) {
+    void filter(const FunctorT & functor, IteratorT it, const IteratorT & end, OutputIteratorT output) {
         for(; it != end; ++it) {
             typename IteratorT::value_type & ref(*it);
             
@@ -83,6 +104,51 @@ namespace cit {
                 ++output;
             }
         }
+    }
+    
+    /*
+     * reduce: FunctorT must be a binary_function that add two items
+     * should be lambda compatible
+     */
+    
+    template<typename IteratorT, typename FunctorT>
+    typename IteratorT::value_type reduce(const FunctorT & func, IteratorT it, const IteratorT & end) {
+        if (it == end)
+            return typename IteratorT::value_type();
+        
+        typename IteratorT::value_type v(*it);
+        
+        for(++it; it != end; ++it)
+            v = func(v, *it);
+        
+        return v;
+    }
+    
+    /*
+     * Alias for mapping containers and initializer_lists
+     */
+    
+    template<typename ContainerT, typename FunctorT>
+    inline typename ContainerT::value_type reduce(const FunctorT & func, const ContainerT & container) {
+        return reduce(func, container.begin(), container.end());
+    }
+    
+    /*
+     * initializer_list special
+     */
+    
+    template<typename T, typename FunctorT>
+    T reduce(const FunctorT & func, std::initializer_list<T> list) {
+        if (list.size() == 0)
+            return typename std::initializer_list<T>::value_type();
+        
+        typename std::initializer_list<T>::const_iterator it(list.begin());
+        typename std::initializer_list<T>::value_type v(*it);
+        
+        for(++it; it != list.end(); ++it)
+            v = func(v, *it);
+        
+        return v;
     }
 }
 
