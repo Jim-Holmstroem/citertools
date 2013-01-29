@@ -9,12 +9,16 @@
  */
 
 namespace cit {
-    template<typename F,typename G>
+    template<typename F, typename G>
     class composition : public std::unary_function<typename G::argument_type, typename F::result_type> {
         public:
+            composition(const F & f, const G & g) : m_f(f), m_g(g) { }
             inline const typename F::result_type & operator() (const typename G::argument_type & value) const {
-                return F(G(value));
+                return m_f(m_g(value));
             }
+        private:
+            const F & m_f;
+            const G & m_g;
             
     };
 
