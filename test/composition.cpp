@@ -18,7 +18,7 @@ int main(int argc, const char **argv) {
      * Test the cit::composition
      */
     
-    auto nn = cit::composition(&std::negate,&std::negate); 
+    auto nn = cit::make_composition(std::negate<int>(), std::negate<int>());//cit::composition(&std::negate,&std::negate); 
     std::cout << nn(1) << std::endl;
 
 
