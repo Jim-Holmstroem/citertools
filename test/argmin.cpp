@@ -56,7 +56,7 @@ int main(int argc, const char **argv) {
     std::cout << "argmin 4: " << cit::argmin({1, 2, 3}) << std::endl;
     
     // backward, i.e. argmax
-    std::cout << "argmax 5: " << cit::argmin({1, 2, 3}, std::negate<int>()) << std::endl;
+    std::cout << "argmin 5: " << cit::argmin({1, 2, 3}, std::negate<int>()) << std::endl;
 
 #endif /* N _CITERTOOLS_CPP11_ */
 }

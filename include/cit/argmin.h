@@ -2,9 +2,7 @@
 #define _CITERTOOLS_ARGMIN_H_
 
 #include <cit/definition.h>
-#include <cit/composition.h>
 #include <cit/identity.h>
-#include <cit/argmax.h>
 
 #ifdef _CITERTOOLS_CPP11_
 #include <initializer_list>
@@ -22,7 +20,19 @@ namespace cit {
     template<typename IteratorT, typename MeasureFunctorT = identity<typename IteratorT::value_type> >
     IteratorT argmin(IteratorT && it, const IteratorT & end,
                      const MeasureFunctorT & functor = MeasureFunctorT()) {
-        return argmax(it, end, make_composition(std::negate<int>(), functor));
+        IteratorT best(it++);
+        typename MeasureFunctorT::result_type best_value(functor(*best));
+
+        for(; it != end; ++it) {
+            typename MeasureFunctorT::result_type value(functor(*it));
+
+            if (value < best_value) {
+                best_value = value;
+                best = it;
+            }
+        }
+
+        return best;
     }
     
     template<typename IteratorT, typename MeasureFunctorT = identity<typename IteratorT::value_type> >
@@ -39,7 +49,7 @@ namespace cit {
     template<typename ContainerT, typename MeasureFunctorT = identity<typename ContainerT::value_type> >
     inline typename ContainerT::const_iterator argmin(const ContainerT & container,
                                                       const MeasureFunctorT & functor = MeasureFunctorT()) {
-        return argmax<typename ContainerT::const_iterator, MeasureFunctorT>(container.begin(), container.end(), functor);
+        return argmin<typename ContainerT::const_iterator, MeasureFunctorT>(container.begin(), container.end(), functor);
     }
     
     /*
@@ -59,7 +69,19 @@ namespace cit {
     template<typename IteratorT, typename MeasureFunctorT>
     IteratorT argmin(IteratorT it, const IteratorT & end,
                      const MeasureFunctorT & functor) {
-        return argmin(it, end, make_composition(std::negate<int>(), functor));
+        IteratorT best(it++);
+        typename MeasureFunctorT::result_type best_value(functor(*best));
+
+        for(; it != end; ++it) {
+            typename MeasureFunctorT::result_type value(functor(*it));
+
+            if (value < best_value) {
+                best_value = value;
+                best = it;
+            }
+        }
+
+        return best;
     }
     
     /*
@@ -70,7 +92,7 @@ namespace cit {
     template<typename ContainerT, typename MeasureFunctorT>
     inline typename ContainerT::const_iterator argmin(const ContainerT & container,
                                                       const MeasureFunctorT & functor) {
-        return argmax<typename ContainerT::const_iterator, MeasureFunctorT>(container.begin(), container.end(), composition(std::negate<functor::return_type>(),functor));
+        return argmin<typename ContainerT::const_iterator, MeasureFunctorT>(container.begin(), container.end(), functor);
     }
     
     #endif /* N C++11 */
