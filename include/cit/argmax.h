@@ -26,7 +26,7 @@ namespace cit {
         for(; it != end; ++it) {
             typename MeasureFunctorT::result_type value(functor(*it));
 
-            if (value > best_value) {
+            if (!(value < best_value)) {
                 best_value = value;
                 best = it;
             }
@@ -75,7 +75,7 @@ namespace cit {
         for(; it != end; ++it) {
             typename MeasureFunctorT::result_type value(functor(*it));
 
-            if (value > best_value) {
+            if (!(value < best_value)) {
                 best_value = value;
                 best = it;
             }
