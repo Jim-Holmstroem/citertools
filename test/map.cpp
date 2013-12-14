@@ -5,6 +5,7 @@
 #include <list>
 #include <iostream>
 #include <iterator>
+#include <functional>
 
 /*
  * similar to std::plus but can take any number of arguments in operator(...)
@@ -82,7 +83,35 @@ int main(int argc, const char **argv) {
      * other map example for containers
      */
     
-    /*std::vector<int> output2;
-    cit::mapc(zipper(), std::back_inserter(output2), vector_ints, list_ints);*/
+    std::vector<int> output2;
+    cit::mapc(zipper(), std::back_inserter(output2), vector_ints, list_ints);
+
+    auto it = cit::mapi(std::function<int(int, int, int)>([] (int x, int y, int z)->int { return x + y + z; }), vector_ints.begin(), vector_ints.end(), list_ints.begin(), list_ints.begin());
+
+    for (; it != it.end(); ++it) {
+        std::cerr << "sum: " << *it << std::endl;
+    }
+
+    for(int element : cit::mapi(std::function<int(int, int, int)>([] (int x, int y, int z)->int { return x + y + z; }), vector_ints.begin(), vector_ints.end(), list_ints.begin(), list_ints.begin())) {
+        std::cerr << element << std::endl;
+    }
+
+    /*
+     * Yet for the coolest, most "Python-like" syntax :)
+     *
+     * Lambdas are still ugly though.
+     */
+
+    auto lambda = std::function<int(int, int, int)>([] (int x, int y, int z)->int { return x + y + z; });
+    //auto lambda = cit::lambda([] (int x, int y, int z)->int { return x + y + z; });
+
+    for(int element : cit::mapic(lambda, vector_ints, list_ints, list_ints)) {
+        std::cerr << element << std::endl;
+    }
+
+    //auto testit = cit::mapic([] (int x, int y, int z)->int { return x + y + z; }, vector_ints, list_ints, list_ints);
+    for(int element : cit::mapic([] (int x, int y, int z) { return x + y + z; }, vector_ints, list_ints, list_ints)) {
+        std::cerr << "element: " << element << std::endl;
+    }
 }
 
