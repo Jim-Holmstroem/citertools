@@ -30,8 +30,8 @@ namespace cit {
             return *it;
         }*/
 
-        template<typename IteratorT>
-        inline const typename IteratorT::value_type & reference(const IteratorT & it) {
+        template<typename ItT>
+        inline const typename ItT::value_type & reference(const ItT & it) {
             return *it;
         }
         
@@ -84,38 +84,54 @@ namespace cit {
         };
         
         template<typename... Args>
-        inline std::tuple<Args...> & increase_tuple(std::tuple<Args...> & tuple) {
-            return _increase_tuple<decltype(tuple), sizeof...(Args)>::increase(tuple);
+        inline std::tuple<Args...> & increase_tuple(
+                std::tuple<Args...> & tuple) {
+            return _increase_tuple<decltype(tuple), sizeof...(Args)>
+                ::increase(tuple);
         }
         
         template<typename... Args>
-        inline std::tuple<Args...> & decrease_tuple(std::tuple<Args...> & tuple) {
-            return _increase_tuple<decltype(tuple), sizeof...(Args)>::decrease(tuple);
+        inline std::tuple<Args...> & decrease_tuple(
+                std::tuple<Args...> & tuple) {
+            return _increase_tuple<decltype(tuple), sizeof...(Args)>
+                ::decrease(tuple);
         }
         
         /*
-         * Now, we need a functor for unpacking the tuple and calling the functor
+         * Functor for unpacking the tuple and calling the given functor.
          */
         
         template<size_t N>
         struct unpack_tuple_functor {
-            template<typename FunctorT, typename IteratorT, typename... TupleArgs, typename... Args>
-            static auto call(const FunctorT & functor, IteratorT & it, std::tuple<TupleArgs...> & tuple, Args... args)->decltype(unpack_tuple_functor<N-1>::call(functor, it, tuple, std::get<N-1>(tuple), args...)) {
+            template<typename FunctorT, typename IteratorT,
+                typename... TupleArgs, typename... Args>
+            static auto call(const FunctorT & functor, IteratorT & it,
+                    std::tuple<TupleArgs...> & tuple, Args... args)
+                        ->decltype(unpack_tuple_functor<N-1>::call(functor, it,
+                                tuple, std::get<N-1>(tuple), args...)) {
                 return unpack_tuple_functor<N-1>::call(functor, it, tuple, std::get<N-1>(tuple), args...);
             }
         };
         
         template<>
         struct unpack_tuple_functor<0> {
-            template<typename FunctorT, typename IteratorT, typename... TupleArgs, typename... Args>
-            static auto call(const FunctorT & functor, IteratorT & it, std::tuple<TupleArgs...> & tuple, Args... args)->decltype(functor(_map::reference(it), _map::reference(args)...)) {
+            template<typename FunctorT, typename IteratorT,
+                typename... TupleArgs, typename... Args>
+            static auto call(const FunctorT & functor, IteratorT & it,
+                    std::tuple<TupleArgs...> & tuple, Args... args)->decltype(
+                        functor(_map::reference(it), _map::reference(args)...)) {
                 return functor(_map::reference(it), _map::reference(args)...);
             }
         };
 
-        template<typename FunctorT, typename IteratorT, typename... TupleArgs, typename... Args>
-        auto call_unpack_tuple(const FunctorT & functor, IteratorT & it, std::tuple<TupleArgs...> & tuple)->decltype(unpack_tuple_functor<sizeof... (TupleArgs)>::call(functor, it, tuple)) {
-            return unpack_tuple_functor<sizeof... (TupleArgs)>::call(functor, it, tuple);
+        template<typename FunctorT, typename IteratorT, typename... TupleArgs,
+            typename... Args>
+        auto call_unpack_tuple(const FunctorT & functor, IteratorT & it,
+                std::tuple<TupleArgs...> & tuple)->decltype(
+                    unpack_tuple_functor<sizeof... (TupleArgs)>::call(
+                        functor, it, tuple)) {
+            return unpack_tuple_functor<sizeof... (TupleArgs)>
+                ::call(functor, it, tuple);
         }
 
         /*
@@ -137,7 +153,8 @@ namespace cit {
                 
                 bool m_cache_valid; /* True if cache is valid */
 
-                typedef decltype(_map::call_unpack_tuple(m_functor, m_it, m_its)) value_type;
+                typedef decltype(
+                    _map::call_unpack_tuple(m_functor, m_it, m_its)) value_type;
                 value_type m_cache;
 
             public:
@@ -168,15 +185,18 @@ namespace cit {
                 }
 
                 /*
-                 * For use with C++11 foreach-style loops that need begin() and end()
+                 * For use with C++11 foreach-style loops that need
+                 * begin() and end().
                  */
 
-                inline map_iterator<FunctorT, IteratorT, Args...> begin() const {
+                inline map_iterator<FunctorT, IteratorT, Args...>
+                        begin() const {
                     return *this;
                 }
                 
                 inline map_iterator end() const {
-                    return map_iterator<FunctorT, IteratorT, Args...>(m_functor, m_end, m_end, m_its);
+                    return map_iterator<FunctorT, IteratorT, Args...>(
+                        m_functor, m_end, m_end, m_its);
                 }
 
                 map_iterator<FunctorT, IteratorT, Args...> & operator++() {
@@ -195,7 +215,8 @@ namespace cit {
                     return it;
                 }
                 
-                inline map_iterator<FunctorT, IteratorT, Args...> & operator--() {
+                inline map_iterator<FunctorT, IteratorT, Args...> &
+                        operator--() {
                     --m_it;
                     _map::decrease_tuple(m_its);
                     m_cache_valid = false;
@@ -213,7 +234,8 @@ namespace cit {
 
                 value_type & operator*() {
                     if (!m_cache_valid) {
-                        m_cache = _map::call_unpack_tuple(m_functor, m_it, m_its);
+                        m_cache = _map::call_unpack_tuple(
+                            m_functor, m_it, m_its);
                         m_cache_valid = true;
                     }
                     
@@ -235,7 +257,9 @@ namespace cit {
      */
 
     template<typename FunctorT, typename IteratorT, typename... Args>
-    _map::map_iterator<FunctorT, IteratorT, Args...> mapi(const FunctorT & functor, const IteratorT & it, const IteratorT & end, const Args&... args) {
+    _map::map_iterator<FunctorT, IteratorT, Args...> mapi(
+            const FunctorT & functor, const IteratorT & it,
+            const IteratorT & end, const Args&... args) {
         return _map::map_iterator<FunctorT, IteratorT, Args...>(functor, it, end, args...);
     }
 
@@ -248,8 +272,12 @@ namespace cit {
      *
      */
     template<typename FunctorT, typename ContainerT, typename... Args>
-    auto mapic(const FunctorT & functor, const ContainerT & container, const Args&... args)->decltype(mapi(functor, container.begin(), container.end(), _map::container(args)...)) {
-        return mapi(functor, container.begin(), container.end(), _map::container(args)...);
+    auto mapic(const FunctorT & functor, const ContainerT & container,
+            const Args&... args)->decltype(
+                mapi(functor, container.begin(), container.end(),
+                _map::container(args)...)) {
+        return mapi(functor, container.begin(), container.end(),
+            _map::container(args)...);
     }
 
     /*
@@ -276,8 +304,10 @@ namespace cit {
      * but in the test suite, a variadic template sum functor is given
      */
     
-    template<typename FunctorT, typename OutputIteratorT, typename IteratorT, typename... Args>
-    void map(const FunctorT & functor, OutputIteratorT output, IteratorT it, const IteratorT & end, Args... its) {
+    template<typename FunctorT, typename OutputIteratorT, typename IteratorT,
+        typename... Args>
+    void map(const FunctorT & functor, OutputIteratorT output, IteratorT it,
+            const IteratorT & end, Args... its) {
         for(; it != end; ++it) {
             output = functor( _map::reference(it), _map::reference(its)... );
             _map::pass ( _map::increase(its)...);
@@ -289,9 +319,12 @@ namespace cit {
      * Alias for containers, might be more convenient in some cases
      */
     
-    template<typename FunctorT, typename OutputIteratorT, typename ContainerT, typename... Args>
-    inline void mapc(const FunctorT & functor, OutputIteratorT output, const ContainerT & container, const Args &... its) {
-        map(functor, output, container.begin(), container.end(), _map::container(its)... );
+    template<typename FunctorT, typename OutputIteratorT, typename ContainerT,
+        typename... Args>
+    inline void mapc(const FunctorT & functor, OutputIteratorT output,
+            const ContainerT & container, const Args &... its) {
+        map(functor, output, container.begin(), container.end(),
+            _map::container(its)... );
     }
     
     /*
@@ -300,7 +333,8 @@ namespace cit {
      */
     
     template<typename FunctorT, typename OutputIteratorT, typename IteratorT>
-    void filter(const FunctorT & functor, IteratorT it, const IteratorT & end, OutputIteratorT output) {
+    void filter(const FunctorT & functor, IteratorT it, const IteratorT & end,
+            OutputIteratorT output) {
         for(; it != end; ++it) {
             typename IteratorT::value_type & ref(*it);
             
@@ -317,7 +351,8 @@ namespace cit {
      */
     
     template<typename IteratorT, typename FunctorT>
-    typename IteratorT::value_type reduce(const FunctorT & func, IteratorT it, const IteratorT & end) {
+    typename IteratorT::value_type reduce(const FunctorT & func, IteratorT it,
+            const IteratorT & end) {
         if (it == end)
             return typename IteratorT::value_type();
         
@@ -334,7 +369,8 @@ namespace cit {
      */
     
     template<typename ContainerT, typename FunctorT>
-    inline typename ContainerT::value_type reduce(const FunctorT & func, const ContainerT & container) {
+    inline typename ContainerT::value_type reduce(const FunctorT & func,
+            const ContainerT & container) {
         return reduce(func, container.begin(), container.end());
     }
     
