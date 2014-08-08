@@ -1,12 +1,14 @@
 HEADER_DIR=./include/cit/
 
-all: argmax argmin map
+all: argmax argmin map io thread_pool
 
 argmax: test/argmax
 argmin: test/argmin
 functional: test/functional
 composition: test/composition
 map: test/map
+io: test/io
+thread_pool: test/thread_pool
 
 test/argmax: test/argmax.cpp $(HEADER_DIR)argmax.h $(HEADER_DIR)definition.h $(HEADER_DIR)identity.h
 	g++ -o test/argmax -std=c++0x -Wall test/argmax.cpp -Iinclude/
@@ -25,4 +27,7 @@ test/map: test/map.cpp $(HEADER_DIR)map.h $(HEADER_DIR)definition.h
 
 test/io: test/io.cpp $(HEADER_DIR)io.h $(HEADER_DIR)definition.h
 	g++ -o test/io -std=c++0x -Wall test/io.cpp -Iinclude/
+
+test/thread_pool: test/thread_pool.cpp $(HEADER_DIR)thread/pool.h $(HEADER_DIR)definition.h
+	g++ -o test/thread_pool -pthread -std=c++0x -Wall test/thread_pool.cpp -Iinclude/
 

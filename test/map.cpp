@@ -55,21 +55,23 @@ int main(int argc, const char **argv) {
      * now do something "funny" with them, do a zip!
      */
     
-    std::vector<int> output;
+    //std::vector<int> output;
     
     /*
      * map example
      */
     
-    cit::map(zipper(), std::back_inserter(output), vector_ints.begin(), vector_ints.end(), list_ints.begin());
+    /*cit::map(zipper(), std::back_inserter(output), vector_ints.begin(), vector_ints.end(), list_ints.begin());
     
     std::cerr << "result: ";
     std::copy(output.begin(), output.end(), std::ostream_iterator<int>(std::cerr, " "));
-    std::cerr << std::endl;
+    std::cerr << std::endl;/*
     
     /*
      * reduce example
      */
+    
+    std::vector<int> output({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 });
     
     std::cerr << "only dividables by 6 results: ";
     cit::filter(is_dividable<6>(), output.begin(), output.end(), std::ostream_iterator<int>(std::cerr, " "));
@@ -83,16 +85,16 @@ int main(int argc, const char **argv) {
      * other map example for containers
      */
     
-    std::vector<int> output2;
-    cit::mapc(zipper(), std::back_inserter(output2), vector_ints, list_ints);
+    /*std::vector<int> output2;
+    cit::mapc(zipper(), std::back_inserter(output2), vector_ints, list_ints);*/
 
-    auto it = cit::mapi([] (int x, int y, int z) { return x + y + z; }, vector_ints.begin(), vector_ints.end(), list_ints.begin(), list_ints.begin());
+    auto it = cit::iterator::map([] (int x, int y, int z) { return x + y + z; }, vector_ints.begin(), vector_ints.end(), list_ints.begin(), list_ints.begin());
 
     for (; it != it.end(); ++it) {
         std::cerr << "sum: " << *it << std::endl;
     }
 
-    for(int element : cit::mapi([] (int x, int y, int z) { return x + y + z; }, vector_ints.begin(), vector_ints.end(), list_ints.begin(), list_ints.begin())) {
+    for(int element : cit::iterator::map([] (int x, int y, int z) { return x + y + z; }, vector_ints.begin(), vector_ints.end(), list_ints.begin(), list_ints.begin())) {
         std::cerr << element << std::endl;
     }
 
@@ -103,12 +105,12 @@ int main(int argc, const char **argv) {
      */
 
 
-    for(int element : cit::mapic([] (int x, int y, int z)->int { return x + y + z; }, vector_ints, list_ints, list_ints)) {
+    for(int element : cit::container::map([] (int x, int y, int z)->int { return x + y + z; }, vector_ints, list_ints, list_ints)) {
         std::cerr << element << std::endl;
     }
 
     //auto testit = cit::mapic([] (int x, int y, int z)->int { return x + y + z; }, vector_ints, list_ints, list_ints);
-    for(int element : cit::mapic([] (int x, int y, int z) { return x + y + z; }, vector_ints, list_ints, list_ints)) {
+    for(int element : cit::container::map([] (int x, int y, int z) { return x + y + z; }, vector_ints, list_ints, list_ints)) {
         std::cerr << "element: " << element << std::endl;
     }
 }
