@@ -22,7 +22,7 @@ test/argmin: test/argmin.cpp $(HEADER_DIR)argmin.h $(HEADER_DIR)definition.h $(H
 #test/composition: test/composition.cpp $(HEADER_DIR)composition.h $(HEADER_DIR)definition.h
 #	g++ -o test/composition -std=c++0x -Wall test/composition.cpp -Iinclude/
 
-test/map: test/map.cpp $(HEADER_DIR)map.h $(HEADER_DIR)definition.h
+test/map: test/map.cpp $(HEADER_DIR)map.h $(HEADER_DIR)tuple.h $(HEADER_DIR)definition.h
 	g++ -o test/map -std=c++0x -Wall test/map.cpp -Iinclude/
 
 test/io: test/io.cpp $(HEADER_DIR)io.h $(HEADER_DIR)definition.h

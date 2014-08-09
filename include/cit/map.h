@@ -5,15 +5,17 @@
 #include <functional>
 #include <iterator>
 #include <numeric>
-#include <tuple>
-#include <type_traits>
 #include <utility>
 
 #ifndef _CITERTOOLS_CPP11_
 #error "Nothing in <cit/map.h> can be used when not using C++11!"
 #else
 
+#include <cit/tuple.h>
+
 #include <initializer_list>
+#include <tuple>
+#include <type_traits>
 
 namespace cit {
     /*
@@ -22,7 +24,7 @@ namespace cit {
      */
     
     namespace _map {
-        template<typename... Args> inline void pass(Args&...) {}
+        template<typename... Args> inline void pass(Args &...) {}
 
         /*
          * Helper method that references arguments before calling the bound functor.
@@ -39,34 +41,6 @@ namespace cit {
                 return functor(*args...);
             }
         };
-
-        template<size_t N>
-        struct for_each_tuple_t {
-            template<typename FunctorT, typename... TupleArgs, typename... Args>
-            static auto call(FunctorT & functor, std::tuple<TupleArgs...> & tuple, Args &... args)
-                    ->decltype(for_each_tuple_t<N-1>::call(functor, tuple, std::get<N-1>(tuple), args...)) {
-                return for_each_tuple_t<N-1>::call(functor, tuple, std::get<N-1>(tuple), args...);
-            }
-        };
-
-        template<>
-        struct for_each_tuple_t<0> {
-            template<typename FunctorT, typename... TupleArgs, typename... Args>
-            static auto call(FunctorT & functor, std::tuple<TupleArgs...> & tuple, Args &... args)
-                    ->decltype(functor(args...)) {
-                return functor(args...);
-            }
-        };
-
-        /*
-         * Generic functor, unwraps the tuple and calls a method.
-         */
-
-        template<typename FunctorT, typename... TupleArgs, typename... Args>
-        inline auto for_each_tuple(FunctorT & functor, std::tuple<TupleArgs...> & tuple)
-                ->decltype(for_each_tuple_t<sizeof...(TupleArgs)>::call(functor, tuple)) {
-            return for_each_tuple_t<sizeof...(TupleArgs)>::call(functor, tuple);
-        }
 
         struct increase_t {
             template<typename... Args>
@@ -100,7 +74,7 @@ namespace cit {
                  */
                 
                 bool cache_valid; /* True if cache is valid */
-                typedef decltype(_map::for_each_tuple(reference_then_call, iterators)) value_type;
+                typedef decltype(tuple_to_args(reference_then_call, iterators)) value_type;
                 value_type cache;
 
             public:
@@ -145,7 +119,7 @@ namespace cit {
 
                 iterator<FunctorT, EndIteratorT, IteratorsT...> & operator++() {
                     increase_t increase;
-                    for_each_tuple(increase, iterators);
+                    tuple_to_args(increase, iterators);
 
                     cache_valid = false;
                     
@@ -163,7 +137,7 @@ namespace cit {
                 inline iterator<FunctorT, EndIteratorT, IteratorsT...> &
                         operator--() {
                     decrease_t decrease;
-                    for_each_tuple(decrease, iterators);
+                    tuple_to_args(decrease, iterators);
                     cache_valid = false;
                     
                     return *this;
@@ -179,7 +153,7 @@ namespace cit {
 
                 value_type & operator*() {
                     if (!cache_valid) {
-                        cache = _map::for_each_tuple(reference_then_call, iterators);
+                        cache = tuple_to_args(reference_then_call, iterators);
                         cache_valid = true;
                     }
                     

@@ -1,5 +1,8 @@
 #include <cit/thread/pool.h>
 
+#include <algorithm>
+#include <cstdlib>
+#include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -20,6 +23,23 @@ int main(int argc, const char **argv) {
     std::cerr << "Waiting for any results..." << std::endl;
     pool.wait_idle();
     std::cerr << "Non-blocking results: future_float: " << future_float.get() << ", future_string: " << future_string.get() << std::endl;
+    
+    // Making sure references work too.
+    
+    int number = 42;
+    std::future<int> future_int2 = pool.push([](int & x) { int copy = x; ++x; return copy; }, std::ref(number));
+    std::cerr << "future_int2: " << future_int2.get();
+    std::cerr << ", number: " << number << std::endl;
+    
+    // And make sure not referencing works too!
+    // Notice that the method still takes a reference, this is faster, it's the same behavior as with std::bind.
+    // The real difference is the use of std::ref as shown above.
+    
+    std::vector<int> rands(100);
+    std::generate(rands.begin(), rands.end(), rand);
+    std::future<int> future_int3 = pool.push([](std::vector<int> & copy) { sleep(1); return int(copy.size()); }, rands);
+    rands.clear();
+    std::cerr << "future_int3: " << future_int3.get() << std::endl;
     
     return 0;
 }

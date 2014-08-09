@@ -5,7 +5,7 @@
 
 #ifndef _CITERTOOLS_CPP11_
 #error "Nothing in <cit/thread/pool.h> can be used when not using C++11!"
-#endif /* N _CITERTOOLS_CPP11_ */
+#else
 
 #include <atomic>
 #include <condition_variable>
@@ -15,31 +15,10 @@
 #include <thread>
 #include <vector>
 
+#include <cit/tuple.h>
+
 namespace cit {
     namespace thread {
-        namespace _pool {
-            template<size_t N>
-            struct unpack_tuple_functor {
-	            template<typename F, typename... TupleArgs, typename... Args>
-	            inline static auto call(F && functor, std::tuple<TupleArgs...> && tuple, Args &&... args)->decltype(unpack_tuple_functor<N - 1>::call(std::forward<F>(functor), std::forward<std::tuple<TupleArgs...>>(tuple), std::get<N - 1>(tuple), args...)) {
-		            return unpack_tuple_functor<N - 1>::call(std::forward<F>(functor), std::forward<std::tuple<TupleArgs...>>(tuple), std::get<N - 1>(tuple), std::forward<Args>(args)...);
-	            }
-            };
-
-            template<>
-            struct unpack_tuple_functor<0> {
-	            template<typename F, typename... TupleArgs, typename... Args>
-	            inline static auto call(F && functor, std::tuple<TupleArgs...> && tuple, Args &&... args)->decltype(functor(args...)) {
-		            return functor(std::forward<Args>(args)...);
-	            }
-            };
-
-            template<typename F, typename... TupleArgs>
-            inline auto call_unpack_tuple(F && functor, std::tuple<TupleArgs...> && tuple)->decltype(
-                    unpack_tuple_functor<sizeof... (TupleArgs)>::call(std::forward<F>(functor), std::forward<std::tuple<TupleArgs...>>(tuple))) {
-	            return unpack_tuple_functor<sizeof... (TupleArgs)>::call(std::forward<F>(functor), std::forward<std::tuple<TupleArgs...>>(tuple));
-            }
-        }
 
         class pool_t {
 	        friend class std::thread;
@@ -71,7 +50,7 @@ namespace cit {
 	        }
 
 	        template<typename Function, typename... Args>
-	        auto push(Function && f, Args &&... args)->std::future<decltype(f(args...))> {
+	        auto push(Function && f, Args... args)->std::future<decltype(f(args...))> {
 		        typedef decltype(f(args...)) R;
 		        task_t<Function, decltype(f(args...)), Args...> *task(new task_t<Function, decltype(f(args...)), Args...>(std::forward<Function>(f), std::forward<Args>(args)...));
 
@@ -115,7 +94,7 @@ namespace cit {
 	        template<typename Function, typename R, typename... Args>
 	        class task_t : public queued_task_t {
 	        public:
-		        inline task_t(Function && f, Args &&... args) : f(std::forward<Function>(f)), args(std::forward<Args>(args)...) {}
+		        inline task_t(Function && f, Args... args) : f(std::forward<Function>(f)), args(std::forward<Args>(args)...) {}
 
 		        inline std::future<R> get() {
 			        return promise.get_future();
@@ -123,7 +102,7 @@ namespace cit {
 
 		        void process() {
 			        try {
-				        promise.set_value(_pool::call_unpack_tuple(std::move(f), std::move(args)));
+			            promise.set_value(tuple_to_args(f, args));
 			        }
 			        catch (...) {
 				        promise.set_exception(std::current_exception());
@@ -190,5 +169,7 @@ namespace cit {
         };
     }
 }
+
+#endif /* _CITERTOOLS_CPP11_ */
 
 #endif /* N _THREAD_POOL_H_ */
