@@ -1,6 +1,6 @@
 HEADER_DIR=./include/cit/
 
-all: argmax argmin map composition2 io thread_pool
+all: argmax argmin map composition2 io thread_pool zip
 
 argmax: test/argmax
 argmin: test/argmin
@@ -8,6 +8,7 @@ functional: test/functional
 composition: test/composition
 map: test/map
 composition2: test/composition2
+zip: test/zip
 io: test/io
 thread_pool: test/thread_pool
 
@@ -28,6 +29,9 @@ test/map: test/map.cpp $(HEADER_DIR)map.h $(HEADER_DIR)tuple.h $(HEADER_DIR)defi
 
 test/composition2: test/composition2.cpp $(HEADER_DIR)composition2.h $(HEADER_DIR)definition.h
 	g++ -o test/composition2 -std=c++0x -Wall test/composition2.cpp -Iinclude/
+
+test/zip: test/zip.cpp $(HEADER_DIR)zip.h $(HEADER_DIR)definition.h
+	g++ -o test/zip -std=c++0x -Wall test/zip.cpp -Iinclude/
 
 test/io: test/io.cpp $(HEADER_DIR)io.h $(HEADER_DIR)definition.h
 	g++ -o test/io -std=c++0x -Wall test/io.cpp -Iinclude/
