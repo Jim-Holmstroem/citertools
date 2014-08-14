@@ -17,7 +17,7 @@ namespace cit2 {
     class _composition : public std::unary_function<
         typename _composition<Fs...>::argument_type,
         typename F::result_type
-    >{
+    > {
         const F & _f;
         const _composition<Fs...> & _fs;
 
